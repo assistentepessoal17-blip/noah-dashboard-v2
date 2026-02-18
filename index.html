@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noah Dashboard</title>
+    <title>Noah - Restricted Access</title>
     <style>
         :root {
             --bg: #050505;
@@ -20,207 +20,213 @@
             background-color: var(--bg);
             color: var(--text);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow: hidden; /* Prevent scrolling while locked */
+        }
+
+        /* LOCK SCREEN */
+        #lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
             display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .login-box {
+            text-align: center;
+            width: 100%;
+            max-width: 320px;
+            padding: 2rem;
+        }
+
+        .lock-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-dim);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+        }
+
+        button {
+            padding: 10px 24px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            height: 20px;
+            opacity: 0;
+        }
+
+        /* DASHBOARD CONTENT (Hidden initially) */
+        #dashboard-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease;
             min-height: 100vh;
             padding: 3rem 1rem;
-        }
-
-        .container {
-            max-width: 800px;
-            width: 100%;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        header {
-            margin-bottom: 3rem;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1.5rem;
+            justify-content: center;
         }
 
-        h1 { 
-            font-size: 2.5rem; 
-            font-weight: 800; 
-            letter-spacing: -0.05em;
-            margin-bottom: 0.2rem;
-        }
-        
-        .subtitle {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .status-badge {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent);
-            padding: 0.4rem 0.8rem;
-            border-radius: 99px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .pulse {
-            width: 6px; 
-            height: 6px; 
-            background: var(--accent); 
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--accent);
-            animation: pulse 2s infinite;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            border-color: var(--accent);
-            transform: translateY(-4px);
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
-        }
-
-        h2 { 
-            font-size: 0.8rem; 
-            color: var(--text-dim); 
-            text-transform: uppercase; 
-            letter-spacing: 0.1em;
-            margin-bottom: 1.2rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.5rem;
-        }
-
+        /* --- Reuse previous styles for dashboard --- */
+        .container { max-width: 800px; width: 100%; }
+        header { margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; }
+        h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.05em; margin-bottom: 0.2rem; }
+        .subtitle { color: var(--text-dim); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .status-badge { background: rgba(59, 130, 246, 0.1); color: var(--accent); padding: 0.4rem 0.8rem; border-radius: 99px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(59, 130, 246, 0.2); display: flex; align-items: center; gap: 6px; }
+        .pulse { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); animation: pulse 2s infinite; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; transition: all 0.3s ease; }
+        .card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+        h2 { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
         ul { list-style: none; }
-        
-        li { 
-            padding: 0.6rem 0; 
-            display: flex; 
-            justify-content: space-between;
-            font-size: 0.95rem;
-            color: var(--text);
-        }
-
-        li span:last-child {
-            color: var(--text-dim);
-            font-family: monospace;
-        }
-
-        .skill-tag {
-            background: #111;
-            padding: 2px 8px;
-            border-radius: 4px;
-            border: 1px solid #333;
-            font-size: 0.8rem;
-        }
-
-        a {
-            color: var(--text);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        
+        li { padding: 0.6rem 0; display: flex; justify-content: space-between; font-size: 0.95rem; color: var(--text); }
+        li span:last-child { color: var(--text-dim); font-family: monospace; }
+        .skill-tag { background: #111; padding: 2px 8px; border-radius: 4px; border: 1px solid #333; font-size: 0.8rem; }
+        a { color: var(--text); text-decoration: none; transition: color 0.2s; }
         a:hover { color: var(--accent); }
-
-        .footer {
-            margin-top: 4rem;
-            text-align: center;
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            opacity: 0.6;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
-        }
+        .footer { margin-top: 4rem; text-align: center; font-size: 0.8rem; color: var(--text-dim); opacity: 0.6; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <div>
-                <h1>Noah 🥷🏻</h1>
-                <p class="subtitle">Personal Assistant System</p>
-            </div>
-            <div class="status-badge">
-                <span class="pulse"></span> ONLINE
-            </div>
-        </header>
-
-        <div class="grid">
-            <!-- System Status -->
-            <div class="card">
-                <h2>System Status</h2>
-                <ul>
-                    <li><span>Core</span> <span>Active</span></li>
-                    <li><span>Model</span> <span>Gemini 3 Pro</span></li>
-                    <li><span>Latency</span> <span>24ms</span></li>
-                    <li><span>Memory</span> <span>Optimal</span></li>
-                </ul>
-            </div>
-
-            <!-- Skills Arsenal -->
-            <div class="card">
-                <h2>Skills Arsenal</h2>
-                <ul>
-                    <li>Google Workspace <span class="skill-tag">v2.0</span></li>
-                    <li>Notion Integration <span class="skill-tag">Sync</span></li>
-                    <li>GitHub Manager <span class="skill-tag">Auth</span></li>
-                    <li>Vercel Deploy <span class="skill-tag">Cloud</span></li>
-                    <li>Exa Neural Search <span class="skill-tag">AI</span></li>
-                </ul>
-            </div>
-
-            <!-- Identity -->
-            <div class="card">
-                <h2>Identity Profile</h2>
-                <ul>
-                    <li><span>User</span> <span>Tárcio Amoras</span></li>
-                    <li><span>Role</span> <span>Gestão & Dev</span></li>
-                    <li><span>Location</span> <span>Belém, BR</span></li>
-                    <li><span>Mode</span> <span>Proactive</span></li>
-                </ul>
-            </div>
-
-            <!-- Resources -->
-            <div class="card">
-                <h2>Connected Resources</h2>
-                <ul>
-                    <li><a href="#">📂 Bases Noah</a> <span>Notion</span></li>
-                    <li><a href="#">📅 Agenda - DB</a> <span>Sync</span></li>
-                    <li><a href="#">💰 Financeiro</a> <span>Secure</span></li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="footer">
-            System generated by OpenClaw • 2026
+    <!-- LOCK SCREEN -->
+    <div id="lock-screen">
+        <div class="login-box">
+            <div class="lock-icon">🔒</div>
+            <h3 style="margin-bottom: 1.5rem; font-weight: 400;">System Locked</h3>
+            <input type="password" id="password" placeholder="Enter Access Key" onkeyup="if(event.key === 'Enter') checkPass()">
+            <button onclick="checkPass()">Unlock</button>
+            <div id="error" class="error-msg">Access Denied</div>
         </div>
     </div>
+
+    <!-- DASHBOARD CONTENT (Hidden) -->
+    <div id="dashboard-content" style="display: none;">
+        <div class="container">
+            <header>
+                <div>
+                    <h1>Noah 🥷🏻</h1>
+                    <p class="subtitle">Personal Assistant System</p>
+                </div>
+                <div class="status-badge">
+                    <span class="pulse"></span> ONLINE
+                </div>
+            </header>
+
+            <div class="grid">
+                <div class="card">
+                    <h2>System Status</h2>
+                    <ul>
+                        <li><span>Core</span> <span>Active</span></li>
+                        <li><span>Model</span> <span>Gemini 3 Pro</span></li>
+                        <li><span>Latency</span> <span>24ms</span></li>
+                        <li><span>Memory</span> <span>Optimal</span></li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h2>Skills Arsenal</h2>
+                    <ul>
+                        <li>Google Workspace <span class="skill-tag">v2.0</span></li>
+                        <li>Notion Integration <span class="skill-tag">Sync</span></li>
+                        <li>GitHub Manager <span class="skill-tag">Auth</span></li>
+                        <li>Vercel Deploy <span class="skill-tag">Cloud</span></li>
+                        <li>Exa Neural Search <span class="skill-tag">AI</span></li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h2>Identity Profile</h2>
+                    <ul>
+                        <li><span>User</span> <span>Tárcio Amoras</span></li>
+                        <li><span>Role</span> <span>Gestão & Dev</span></li>
+                        <li><span>Location</span> <span>Belém, BR</span></li>
+                        <li><span>Mode</span> <span>Proactive</span></li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h2>Connected Resources</h2>
+                    <ul>
+                        <li><a href="#">📂 Bases Noah</a> <span>Notion</span></li>
+                        <li><a href="#">📅 Agenda - DB</a> <span>Sync</span></li>
+                        <li><a href="#">💰 Financeiro</a> <span>Secure</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer">
+                System generated by OpenClaw • 2026
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkPass() {
+            const pass = document.getElementById('password').value;
+            const error = document.getElementById('error');
+            
+            // Simple check (visual protection only)
+            if (pass === 'noah') {
+                document.getElementById('lock-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('lock-screen').style.display = 'none';
+                    document.getElementById('dashboard-content').style.display = 'flex';
+                    // Trigger reflow
+                    setTimeout(() => {
+                        document.getElementById('dashboard-content').style.opacity = '1';
+                    }, 50);
+                }, 500);
+            } else {
+                error.style.opacity = '1';
+                input = document.getElementById('password');
+                input.style.borderColor = '#ef4444';
+                input.value = '';
+                setTimeout(() => {
+                    error.style.opacity = '0';
+                    input.style.borderColor = '#333';
+                }, 2000);
+            }
+        }
+    </script>
 
 </body>
 </html>
